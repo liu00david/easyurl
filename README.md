@@ -1,0 +1,2 @@
+# easyurl
+easy url generator
