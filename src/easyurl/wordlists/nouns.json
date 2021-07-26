@@ -1,9 +1,7 @@
 {
     "words": {
-        "3": "cake",
-        "1": "figure",
-        "0": "tree",
-        "2": "water"
+        "1": "book",
+        "0": "tree"
     },
-    "cur_index": 3
+    "cur_index": 1
 }

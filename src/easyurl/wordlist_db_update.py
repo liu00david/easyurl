@@ -3,53 +3,45 @@ import os
 import pathlib
 import re
 
+def check_word_format(word):
+    """
+    Only returns True if word is
+    1-5 letters long
+    have only letters (a-z)
+    Cleans the word to lowercase
+    """
+    pattern = re.compile("[a-z]+")
+    if not(1 <= len(word) <= 5):
+        print("BAD FORMAT: Word must be 1-5 letters long.")
+        return False
+    if not(pattern.fullmatch(word)):
+        print("BAD FORMAT: Word must be only letters (a-z, A-Z)")
+        return False
+    return True
+
 
 class WordlistDatabaseFuncs:
     """
     Updates the wordlists DB
     """
 
-    def __init__(self, action, part_of_speech, word):
-        self.word = word
-        self.pos = part_of_speech
+    def __init__(self, action, pos, word):
+        self.word = word.lower()
+        self.pos = pos
 
         if action == "add":
-            if self.check_word_format() == False:
-                print("Word formatting failed.")
+            if not check_word_format(self.word):
                 exit()
             self.add_word()
-        elif action == "remove":
-            self.remove_word()
+        elif action == "replace":
+            self.replace_word()
         else:
             self.reset()
 
-
-    def get_json_data(pos):
+    def get_wordlist_path(self):
         curdir_path = pathlib.Path(__file__).parent.resolve()
-        wordlist_path = os.path.join(curdir_path, ("wordlists/" + pos + '.json'))
-        with open(wordlist_path) as f:
-            data = json.load(f)
-        return data
-
-
-    def check_word_format(self):
-        """
-        Only returns True if word is
-        1-5 letters long
-        have only letters (a-z A-Z)
-        Cleans the word to lowercase
-        """
-        word = self.word
-        pattern = re.compile("[A-Za-z]+")
-        if not(1 <= len(word) <= 5):
-            print("Word must be 1-5 letters long.")
-            return False
-        if not(pattern.fullmatch(word)):
-            print("Word must be only letters (a-z, A-Z)")
-            return False
-        # lowercase the word
-        self.word = word.lower()
-        return True
+        wordlist_path = os.path.join(curdir_path, ("wordlists/" + self.pos + '.json'))
+        return wordlist_path
 
 
     def add_word(self):
@@ -57,9 +49,11 @@ class WordlistDatabaseFuncs:
         Adds word to partsofspeech jsons.
         If exists already, do nothing.
         """
-        word = self.word    # easier to call
+        word = self.word    # easier to call word now
 
-        data = self.get_json_data(self.pos)
+        wordlist_path = self.get_wordlist_path()
+        with open(wordlist_path) as f:
+            data = json.load(f)
 
         # checking if word exists, or just has 's' added
         existing_words = data["words"].values()
@@ -70,7 +64,7 @@ class WordlistDatabaseFuncs:
             return
 
         next_index = int(data["cur_index"]) + 1     # new index
-        data["words"][next_index] = word       # update wordlist
+        data["words"][next_index] = word            # update wordlist
         data["words"] = dict(sorted(data["words"].items(), key=lambda item: item[1])) # alphabetisize
         data["cur_index"] = next_index              # update index
 
@@ -80,8 +74,29 @@ class WordlistDatabaseFuncs:
         print(f"[{word}] added to [{self.pos}]. This is the [{next_index}] indexed word added.")
 
 
-    def remove_word(self):
-        pass
+    def replace_word(self):
+        """
+        Replaces the word in the wordlist if it exists.
+        Also checks new word for formatting.
+        """
+        wordlist_path = self.get_wordlist_path()
+        with open(wordlist_path) as f:
+            data = json.load(f)
+
+        for index, exist_word in data["words"].items():
+            if self.word == exist_word:
+                new_word = input("New word:\n")
+                if not check_word_format(new_word):
+                    exit()
+                # write new_word in
+                data["words"][index] = new_word
+
+                with open(wordlist_path, 'w') as f:
+                    json.dump(data, f, indent = 4)
+                print(f"[{self.word}] has been replaced by [{new_word}]!")
+                return
+
+        print(f"[{self.word}] does not exist in list!")
 
 
     def reset(self):
@@ -92,9 +107,9 @@ class WordlistDatabaseFuncs:
             "words" : {},
             "cur_index" : -1,
         }
-        curdir_path = pathlib.Path(__file__).parent.resolve()
-        wordlist_path = os.path.join(curdir_path, ("wordlists/" + self.pos + '.json'))
+        wordlist_path = self.get_wordlist_path()
         with open(wordlist_path, 'w') as f:
             json.dump(resetdata, f, indent = 4)
+        print(f"[{self.pos}] wordlist has been reset.")
 
 
