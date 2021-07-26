@@ -20,6 +20,17 @@ def check_word_format(word):
     return True
 
 
+def exists_already(data, word):
+    # checking if word exists, or just has 's' added
+    existing_words = data["words"].values()
+    word_with_s = word + "s"
+    word_without_s = word[0:-1] if word[-1] == 's' else word
+    if word_with_s in existing_words or word_without_s in existing_words:
+        print("Already exists (or just has an 's')! Nothing done.")
+        return True
+    return False
+
+
 class WordlistDatabaseFuncs:
     """
     Updates the wordlists DB
@@ -55,13 +66,8 @@ class WordlistDatabaseFuncs:
         with open(wordlist_path) as f:
             data = json.load(f)
 
-        # checking if word exists, or just has 's' added
-        existing_words = data["words"].values()
-        word_with_s = word + "s"
-        word_without_s = word[0:-1] if word[-1] == 's' else word
-        if word_with_s in existing_words or word_without_s in existing_words:
-            print("Already exists (or just has an 's')! Nothing done.")
-            return
+        if exists_already(data,word):
+            exit()
 
         next_index = int(data["cur_index"]) + 1     # new index
         data["words"][next_index] = word            # update wordlist
@@ -87,6 +93,8 @@ class WordlistDatabaseFuncs:
             if self.word == exist_word:
                 new_word = input("New word:\n")
                 if not check_word_format(new_word):
+                    exit()
+                if exists_already(data,new_word):
                     exit()
                 # write new_word in
                 data["words"][index] = new_word
