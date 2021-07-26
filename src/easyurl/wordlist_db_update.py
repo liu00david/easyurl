@@ -98,6 +98,7 @@ class WordlistDatabaseFuncs:
                     exit()
                 # write new_word in
                 data["words"][index] = new_word
+                data["words"] = dict(sorted(data["words"].items(), key=lambda item: item[1]))
 
                 with open(wordlist_path, 'w') as f:
                     json.dump(data, f, indent = 4)
