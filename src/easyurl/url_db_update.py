@@ -1,43 +1,61 @@
+import math
+
+
+def pair(k1, k2):
+    """
+    Cantor pairing function
+    """
+    z = int(0.5 * (k1 + k2) * (k1 + k2 + 1) + k2)
+    return z
+
+
+def depair(z):
+    """
+    Inverse of Cantor pairing function
+    """
+    w = math.floor((math.sqrt(8 * z + 1) - 1) / 2)
+    t = (w**2 + w) / 2
+    y = int(z - t)
+    x = int(w - y)
+    return x, y
+
+
 class UrlDatabaseFuncs:
     """
-    NEED ANOTHER MODULE FOR UPDATING THE WORDS DATABASE
-
     Called when new URL needs a shortname.
-
-    DATABASE STRUCT
-    2 tables, one of urlindex:url, another that keeps tracks of taken indices
-    Calls database
-
-    Randomly picks one index, put URL in
     """
 
     def __init__(self):
-        self.random = "hi"
+        self.url = "hi.com"
 
-    def printthis(self):
-        print('this')
-
-    def create_table(self):
+    def db_get_index(self):
         """
-        creates the table
+        Gets next avail index in DB
+        Input: none, output: index
         """
 
-    def get_indices_database(self):
+    def get_shortname_tuple(self, index):
         """
-        Gets first 100 null values' indices
+        Given index, find shortname tuple (int,int,int,int)
+        Input: index, output: tuple
+        """
+        out_pair = depair(index)
+        in_pair_A = depair(out_pair[0])
+        in_pair_B = depair(out_pair[1])
+        return tuple(in_pair_A[0], in_pair_A[1], in_pair_B[0], in_pair_B[1])
+
+    def get_shortname_string(self, shortname_tuple):
+        """
+        Given shortname_tuple, give shortname string
+        adj(shortname_tuple[0])
+        nouns(shortname_tuple[1])
+        adj(shortname_tuple[2])
+        nouns(shortname_tuple[3])
+        Input: tuple, output: string
         """
 
-    def add_url_database(self):
+    def db_add_entry(self, index, url):
         """
-        Adds URL to one of the indices
-        """
-
-    def get_shortname(self, index):
-        """
-        Gets shortname from index e.g. 100111000 -> cat eats here
-        needs to query wordsDB
-        adjectives(100)
-        nouns(111)
-        verbs(000)
-
+        Given index, url, entry into DB
+        Input: self index, output: none
         """
