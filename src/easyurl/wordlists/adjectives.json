@@ -14,6 +14,7 @@
         "34": "calm",
         "91": "cheap",
         "92": "chill",
+        "101": "clean",
         "87": "close",
         "72": "cold",
         "36": "cool",
@@ -102,5 +103,5 @@
         "77": "wild",
         "74": "young"
     },
-    "cur_index": 100
+    "cur_index": 101
 }
