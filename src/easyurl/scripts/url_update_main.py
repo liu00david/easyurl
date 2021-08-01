@@ -12,6 +12,7 @@ def start_url(args):
     """
     UrlDatabaseFuncs("hi.com")
 
+
 def main():
     parser = argparse.ArgumentParser(description='Update wordlist DB.')
     # parser.add_argument('action', type=str, choices=["add","replace","reset"],
@@ -22,6 +23,7 @@ def main():
     args = parser.parse_args()
 
     start_url(args)
+
 
 if __name__ == '__main__':
     main()

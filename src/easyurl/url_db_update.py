@@ -4,7 +4,13 @@ import json
 import os
 from pymongo import MongoClient
 
-cluster = MongoClient("test")
+curdir_path = pathlib.Path(__file__).parent.resolve()
+private_key_path = os.path.join(curdir_path, "private/private_key.txt")
+
+with open(private_key_path) as f:
+    private_key = f.read()
+
+cluster = MongoClient(private_key)
 
 def pair(k1, k2):
     """
@@ -46,7 +52,6 @@ class UrlDatabaseFuncs:
             print("easyurl.com/" + shortname_string)
             i += 1
 
-
     def db_get_index(self):
         """
         Gets next avail index in DB
@@ -87,7 +92,6 @@ class UrlDatabaseFuncs:
 
         shortname_string = adjective1 + noun1 + adjective2 + noun2
         return shortname_string
-
 
     def db_add_entry(self, index, url):
         """

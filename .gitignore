@@ -53,3 +53,4 @@ MANIFEST
 .conda*/
 
 pip-wheel-metadata/
+src/easyurl/private/
