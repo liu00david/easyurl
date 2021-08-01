@@ -2,6 +2,9 @@ import math
 import pathlib
 import json
 import os
+from pymongo import MongoClient
+
+cluster = MongoClient("test")
 
 def pair(k1, k2):
     """
@@ -40,7 +43,7 @@ class UrlDatabaseFuncs:
         while i < 100000:
             shortname_tuple = self.get_shortname_tuple(i)
             shortname_string = self.get_shortname_string(shortname_tuple)
-            print(shortname_string)
+            print("easyurl.com/" + shortname_string)
             i += 1
 
 
