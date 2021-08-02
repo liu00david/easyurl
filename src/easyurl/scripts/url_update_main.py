@@ -3,14 +3,15 @@ import argparse
 from easyurl.url_db_update import UrlDatabaseFuncs
 
 
-def start_url(args):
+def start_url_update(args):
     """
     12,753,774 is the max depair input index for 99,99 nouns and adjs
     pair(0,5049)
     Say that theres a cap of 12,000,000
 
     """
-    UrlDatabaseFuncs("hi.com")
+    urlUpdater = UrlDatabaseFuncs("hi.com")
+    print(urlUpdater.db_add_entry())
 
 
 def main():
@@ -22,7 +23,7 @@ def main():
 
     args = parser.parse_args()
 
-    start_url(args)
+    start_url_update(args)
 
 
 if __name__ == '__main__':

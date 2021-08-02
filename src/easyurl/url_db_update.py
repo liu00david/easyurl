@@ -2,31 +2,7 @@ import math
 import pathlib
 import json
 import os
-from pymongo import MongoClient
-
-
-def db_connector():
-    curdir_path = pathlib.Path(__file__).parent.resolve()
-    private_key_path = os.path.join(curdir_path, "private/private_key.txt")
-
-    with open(private_key_path) as f:
-        private_key = f.read()
-
-    cluster = MongoClient(private_key)
-    db = cluster["test"]
-    collection = db["testcollname"]
-
-    post = {"_id": 0, "name": "time", "score": 5}
-
-    collection.insert_one(post)
-
-
-def pair(k1, k2):
-    """
-    Cantor pairing function
-    """
-    z = int(0.5 * (k1 + k2) * (k1 + k2 + 1) + k2)
-    return z
+from easyurl.private.db_connector import DBConnector
 
 
 def depair(z):
@@ -40,7 +16,47 @@ def depair(z):
     return x, y
 
 
+def get_shortname_tuple(index):
+    """
+    Given index, find shortname tuple (int,int,int,int)
+    Input: index, output: tuple
+    """
+    I_pair = depair(index)
+    A_pair = depair(I_pair[0])
+    B_pair = depair(I_pair[1])
+    return (A_pair[0], A_pair[1], B_pair[0], B_pair[1])
+
+
+def get_shortname_string(shortname_tuple):
+    """
+    Given shortname_tuple, give shortname string
+    adj(shortname_tuple[0])
+    nouns(shortname_tuple[1])
+    adj(shortname_tuple[2])
+    nouns(shortname_tuple[3])
+    Input: tuple, output: string
+    """
+    nouns_wordlist_path = get_wordlist_path("nouns")
+    with open(nouns_wordlist_path) as f1:
+        nouns_data = json.load(f1)
+
+    adjectives_wordlist_path = get_wordlist_path("adjectives")
+    with open(adjectives_wordlist_path) as f2:
+        adjectives_data = json.load(f2)
+
+    adjective1 = adjectives_data["words"][str(shortname_tuple[0])]
+    noun1 = nouns_data["words"][str(shortname_tuple[1])]
+    adjective2 = adjectives_data["words"][str(shortname_tuple[2])]
+    noun2 = nouns_data["words"][str(shortname_tuple[3])]
+
+    shortname_string = adjective1 + noun1 + adjective2 + noun2
+    return shortname_string
+
+
 def get_wordlist_path(pos):
+    """
+    Get relative path of wordlist.
+    """
     curdir_path = pathlib.Path(__file__).parent.resolve()
     wordlist_path = os.path.join(curdir_path, ("wordlists/" + pos + '.json'))
     return wordlist_path
@@ -48,63 +64,34 @@ def get_wordlist_path(pos):
 
 class UrlDatabaseFuncs:
     """
-    Called when new URL needs a shortname.
+    Insert new URL into the database. Creates an easyurl and returns it.
     """
 
     def __init__(self, url):
-        self.url = url
+        self.pre_url = url
 
-        db_connector()
-        # i = 0
-        # while i < 100000:
-        #     shortname_tuple = self.get_shortname_tuple(i)
-        #     shortname_string = self.get_shortname_string(shortname_tuple)
-        #     print("easyurl.com/" + shortname_string)
-        #     i += 1
-
-    def db_get_index(self):
+    def db_add_entry(self):
         """
-        Gets next avail index in DB
-        Input: none, output: index
+        Opens database, gets counters and url_mapping collections,
         """
 
-    def get_shortname_tuple(self, index):
-        """
-        Given index, find shortname tuple (int,int,int,int)
-        Input: index, output: tuple
-        """
-        I_pair = depair(index)
-        A_pair = depair(I_pair[0])
-        B_pair = depair(I_pair[1])
-        return (A_pair[0], A_pair[1], B_pair[0], B_pair[1])
+        db = DBConnector.db_connector()
+        url_mapping_collection = db["urlMapping"]
+        counters_collection = db["counters"]
 
-    def get_shortname_string(self, shortname_tuple):
-        """
-        Given shortname_tuple, give shortname string
-        adj(shortname_tuple[0])
-        nouns(shortname_tuple[1])
-        adj(shortname_tuple[2])
-        nouns(shortname_tuple[3])
-        Input: tuple, output: string
-        """
-        nouns_wordlist_path = get_wordlist_path("nouns")
-        with open(nouns_wordlist_path) as f1:
-            nouns_data = json.load(f1)
+        # Get counter value from counters, then convert to shortname string
+        # Add one to get next url's counter
+        try:
+            cur_index = counters_collection.find()[0]['seq_value'] + 1
+        except IndexError:
+            print("Counter not found. Initializing counter.")
+            cur_index = 0
+        shortname_tuple = get_shortname_tuple(cur_index)
+        shortname_string = get_shortname_string(shortname_tuple)
+        post_url = "https://easyurl.com/" + shortname_string
 
-        adjectives_wordlist_path = get_wordlist_path("adjectives")
-        with open(adjectives_wordlist_path) as f2:
-            adjectives_data = json.load(f2)
+        query = {"pre_url": self.pre_url, "post_url": post_url}
 
-        adjective1 = adjectives_data["words"][str(shortname_tuple[0])]
-        noun1 = nouns_data["words"][str(shortname_tuple[1])]
-        adjective2 = adjectives_data["words"][str(shortname_tuple[2])]
-        noun2 = nouns_data["words"][str(shortname_tuple[3])]
+        url_mapping_collection.insert_one(query)
 
-        shortname_string = adjective1 + noun1 + adjective2 + noun2
-        return shortname_string
-
-    def db_add_entry(self, index, url):
-        """
-        Given index, url, entry into DB
-        Input: self index, output: none
-        """
+        return post_url
