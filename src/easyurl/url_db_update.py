@@ -4,13 +4,22 @@ import json
 import os
 from pymongo import MongoClient
 
-curdir_path = pathlib.Path(__file__).parent.resolve()
-private_key_path = os.path.join(curdir_path, "private/private_key.txt")
 
-with open(private_key_path) as f:
-    private_key = f.read()
+def db_connector():
+    curdir_path = pathlib.Path(__file__).parent.resolve()
+    private_key_path = os.path.join(curdir_path, "private/private_key.txt")
 
-cluster = MongoClient(private_key)
+    with open(private_key_path) as f:
+        private_key = f.read()
+
+    cluster = MongoClient(private_key)
+    db = cluster["test"]
+    collection = db["testcollname"]
+
+    post = {"_id": 0, "name": "time", "score": 5}
+
+    collection.insert_one(post)
+
 
 def pair(k1, k2):
     """
@@ -45,12 +54,13 @@ class UrlDatabaseFuncs:
     def __init__(self, url):
         self.url = url
 
-        i = 0
-        while i < 100000:
-            shortname_tuple = self.get_shortname_tuple(i)
-            shortname_string = self.get_shortname_string(shortname_tuple)
-            print("easyurl.com/" + shortname_string)
-            i += 1
+        db_connector()
+        # i = 0
+        # while i < 100000:
+        #     shortname_tuple = self.get_shortname_tuple(i)
+        #     shortname_string = self.get_shortname_string(shortname_tuple)
+        #     print("easyurl.com/" + shortname_string)
+        #     i += 1
 
     def db_get_index(self):
         """
