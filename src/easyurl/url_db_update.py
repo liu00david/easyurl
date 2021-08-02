@@ -82,11 +82,11 @@ class UrlDatabaseFuncs:
         # Get counter value from counters, then convert to shortname string
         # Add one to get next url's counter
         try:
-            cur_index = counters_collection.find()[0]['seq_value'] + 1
+            next_index = counters_collection.find()[0]['seq_value'] + 1
         except IndexError:
             print("Counter not found. Initializing counter.")
-            cur_index = 0
-        shortname_tuple = get_shortname_tuple(cur_index)
+            next_index = 1
+        shortname_tuple = get_shortname_tuple(next_index)
         shortname_string = get_shortname_string(shortname_tuple)
         post_url = "https://easyurl.com/" + shortname_string
 
@@ -95,3 +95,8 @@ class UrlDatabaseFuncs:
         url_mapping_collection.insert_one(query)
 
         return post_url
+
+
+if __name__ == "__main__":
+    for i in range(100):
+        print(i, get_shortname_string(get_shortname_tuple(i)))

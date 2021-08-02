@@ -4,6 +4,7 @@ from easyurl.url_db_update import UrlDatabaseFuncs
 
 
 def start_url_update(args):
+    verbose = args.verbose
     """
     12,753,774 is the max depair input index for 99,99 nouns and adjs
     pair(0,5049)
@@ -11,15 +12,15 @@ def start_url_update(args):
 
     """
     urlUpdater = UrlDatabaseFuncs("hi.com")
-    print(urlUpdater.db_add_entry())
+    post_url = urlUpdater.db_add_entry()
+    if verbose:
+        print(post_url)
 
 
 def main():
     parser = argparse.ArgumentParser(description='Update wordlist DB.')
-    # parser.add_argument('action', type=str, choices=["add","replace","reset"],
-    #                     help='Choose the action.')
-    # parser.add_argument('pos', type=str, choices=["nouns","adjectives"],
-    #                     help='Choose the part of speech.')
+    parser.add_argument('-v', '--verbose', default=False, action='store_true',
+                        help='Show verbose. Default show nothing.')
 
     args = parser.parse_args()
 
